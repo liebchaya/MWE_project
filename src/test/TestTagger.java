@@ -11,8 +11,8 @@ public class TestTagger {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		Tagger.init("F:\\BGUTaggerData\\");
-		System.out.println(Tagger.getTaggerPOSList("אבא אכל תפוח"));
+		Tagger.init("c:\\BGUTaggerData\\");
+		System.out.println(Tagger.getTaggerPOSList("הילד אוסף את המשחקים בחצר"));
 	}
 
 }

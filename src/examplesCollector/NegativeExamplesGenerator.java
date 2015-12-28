@@ -1,11 +1,13 @@
-/**
+/*
  * 
  */
 package examplesCollector;
 
+import java.util.List;
+
 import models.MweExample;
 
-/**
+/*
  * @author Admin
  *
  */
@@ -19,6 +21,5 @@ public interface NegativeExamplesGenerator {
 			
 	boolean isSuitableDistance(String sentence);
 		
-	Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random);
-		
+	Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random);	
 }
