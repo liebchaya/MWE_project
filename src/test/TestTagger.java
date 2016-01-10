@@ -39,6 +39,8 @@ public class TestTagger {
 //		}
 //		reader.close();
 //		writer.close();
+		Tagger.init("c:\\BGUTaggerData\\");
+		System.out.println(Tagger.getTaggerPOSList("הילד אוסף את המשחקים בחצר"));
 	}
 
 }
