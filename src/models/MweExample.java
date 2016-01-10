@@ -5,7 +5,6 @@ public class MweExample {
 	String mwe;
 	String sentence;
 	int sentenceId;
-	
 	public int getSentenceId() {
 		return sentenceId;
 	}

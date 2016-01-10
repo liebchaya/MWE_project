@@ -79,7 +79,7 @@ public class Tagger {
 	/**
 	 * Gets the most probable lemma, supports ngrams
 	 * @param str
-	 * @return a set - containing the most probable lemma - a single string
+	 * @return a set - containing the POS
 	 * @throws Exception
 	 */
 	public static List<String>  getTaggerPOSList(String str) throws Exception{
@@ -91,6 +91,23 @@ public class Tagger {
 		 }
 		}
 		return lemmas;
+	}
+	
+	/**
+	 * Gets the most probable lemma, supports ngrams
+	 * @param str
+	 * @return a string - containing the POS
+	 * @throws Exception
+	 */
+	public static String  getTaggerPOSString(String str) throws Exception{
+		String posString = "";
+		for (Sentence sentence : getTaggedSentences(str)) {
+			for (TokenExt token : sentence.getTokens()) {
+				token._token.getSelectedAnal().getTag();
+					posString = posString + " " +token._token.getSelectedAnal().getTag().toString();
+		 }
+		}
+		return posString.trim();
 	}
 	
 }
