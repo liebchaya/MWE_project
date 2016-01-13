@@ -25,7 +25,7 @@ public class TestTagger {
 //		System.out.println(posStr);
 //		if(posStr.contains("noun")&&posStr.contains("verb"))
 //			System.out.println("Suitable");
-		
+		   //
 		
 //		BufferedReader reader = new BufferedReader(new FileReader("F:\\targetTermsVNC.txt"));
 //		BufferedWriter writer = new BufferedWriter(new FileWriter("F:\\targetTermsVNC_lemmas.txt"));
