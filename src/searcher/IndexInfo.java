@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -46,22 +48,13 @@ public class IndexInfo {
 	    
 		while(iterableSize > 0){
 			randomNum = rand.nextInt(maxValue);
-			if(isSuitableDistance(getSentenceContent(randomNum))){  //if sentence has good distance
+			if(isSuitableDistance(getSentenceContent(randomNum)) != null){  //if sentence has good distance
 				sentencesIndexes.add(randomNum);
 				iterableSize--;
 			}
 		}
 		
 		return sentencesIndexes;
-	}
-			
-	public boolean isSuitableDistance(String sentence)throws Exception{
-		
-			Tagger.init("c:\\BGUTaggerData\\");
-			List<String> posList = Tagger.getTaggerPOSList(sentence);
-			
-			if(SelectedNoun(posList) != -1)return true;
-			else return false;
 	}
 	
 	public Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
@@ -81,47 +74,67 @@ public class IndexInfo {
 		return mweExamples;
 	}
 	
-	public boolean isNotMWE(Integer index) throws Exception{
+	private int getLength(Iterable<Integer> it){
+		int i=0;
+		for(Integer index : it)
+			i++;
+		return i;
+	}
+	
+	private Integer[] isSuitableDistance(String sentence)throws Exception{
+		List<String> posList = Tagger.getTaggerPOSList(sentence);
+	    Integer[] verbNoun = new Integer[2];
 		
-		boolean b = false;
-		Tagger.init("c:\\BGUTaggerData\\");
-		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\AppData\\Local\\GitH\\ub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\targetTermsVNC.txt");
+		Iterable<Integer> verbIndex =  getVerbIndexes(posList);
+		Iterable<Integer> nounIndex = getNounIndexes(posList);
+		if(getLength(verbIndex) == 0 || getLength(nounIndex) == 0 )
+		   return null;
+		for(Integer verb : verbIndex)
+		for(Integer noun : nounIndex)
+			if(Math.abs(verb - noun) < 2){
+				verbNoun[0] = verb;
+				verbNoun[1] = noun;
+				return verbNoun;
+			}
+		return null;
+
+}
+	
+	private boolean isNotMWE(Integer index) throws Exception{
+		
+		boolean b = false;		
+		FileInputStream MWEfile = new FileInputStream("C:\\javaInstallation\\jre\\lib\\targetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
         String strLine;
+        String sen = getSentenceContent(index);
+        String[]wordsArray = sen.split(" ");
+        Integer[] nounVerbforCheck = isSuitableDistance(sen);
         
-        List<String> posListforCheck = Tagger.getTaggerPOSList(getSentenceContent(index));
-        Integer verbIndex = getVerbIndex(posListforCheck);
-        Iterable<Integer> nounIndex = getNounIndexes(posListforCheck);
-        
-        List<String> posList;
-        Integer verb;
-        Iterable<Integer> nouns;
-        
+        String[]words;
+        Integer[] nounVerb;
+           
+        int n = 0;
         while ((strLine = br.readLine()) != null) {
-        	posList = Tagger.getTaggerPOSList(strLine); 
-        	verb = getVerbIndex(posList);
-        	nouns = getNounIndexes(posList);
-        	if(LongestCommonSubstring(posList.get(verb), posListforCheck.get(verbIndex)) < 3){
-        		br.close();
-        		return false;
-        	}
-        	for(Integer noun1 : nouns){
-        		for(Integer noun2 : nounIndex)
-        			if(posList.get(noun1).equals(noun2))
-        				b = true;
-        		if(!b){
-        			br.close();
-        			return false;
-        		}
-    		}
-        }
-        
+			words = strLine.split(" ");
+        	nounVerb = isSuitableDistance(strLine);
+        	if(nounVerb != null){
+        	if(LongestCommonSubstring(words[nounVerb[0]], wordsArray[nounVerbforCheck[0]]) >= 3)
+    		for(String findNoun : wordsArray){
+        			if(findNoun.length() > 3)n = 2;
+    				if(LongestCommonSubstring(findNoun, wordsArray[nounVerb[1]]) > findNoun.length()-n)
+        					b = true;
+        			}  	
+    		if(b){
+    			br.close();
+    			return false;	
+			     }
+            }
+        }    
         br.close();
-		return true;
-		
+		return true;		
 	} 
 	
-	public Iterable<Integer> getNounIndexes(List<String> posList){
+	private Iterable<Integer> getNounIndexes(List<String> posList){
 		
 		ArrayList<Integer> NounIndexes = new ArrayList<Integer>();
 		
@@ -135,20 +148,21 @@ public class IndexInfo {
 		return NounIndexes;
 	}
 	
-	public Integer getVerbIndex(List<String> posList){
+	private Iterable<Integer> getVerbIndexes(List<String> posList){
 		
-		int verbIndex  =  0;
+		ArrayList<Integer> verbIndexes = new ArrayList<Integer>();
 		
+		int verbIndex  =  0;	
 		for(String pos : posList){
 			if(pos.contains("verb"))
-					break;
-			verbIndex++;	
+				verbIndexes.add(verbIndex);
+			verbIndex++;
 		}
-		
-		return verbIndex;
+			
+		return verbIndexes;
 	}
 
-	public int LongestCommonSubstring(String str1, String str2)
+	private int LongestCommonSubstring(String str1, String str2)
     {
         int[][] num = new int[str1.length()][str2.length()];
         int maxlen = 0;
@@ -175,31 +189,17 @@ public class IndexInfo {
         }
         return maxlen;
     }
-
-	public int SelectedNoun(List<String> posList){
-		int verbIndex  =  getVerbIndex(posList);
-		Iterable<Integer> nounIndex = getNounIndexes(posList);
-		
-		for(Integer index : nounIndex)
-			if(Math.abs(index - verbIndex) < 2)
-					return index;
-		return -1;
-	}
-
-	public String getMWE(Integer index) throws IOException, Exception{
+	
+	private String getMWE(Integer index) throws IOException, Exception{
 		
 		Tagger.init("c:\\BGUTaggerData\\");  
-        List<String> posList = Tagger.getTaggerPOSList(getSentenceContent(index));
+		String sen = getSentenceContent(index);
+		String[]wordsArray = sen.split(" ");
         String mwe = "";
-        int start = getVerbIndex(posList);
-        int end = SelectedNoun(posList);
-        if(start > end) {
-        	int temp = start;
-        	start = end;
-        	end = temp;
-        }
-        for(int i=start; i<=end; i++)
-        	mwe += posList.get(i);
+        Integer[] verbNoun = isSuitableDistance(sen);
+        if (verbNoun == null)
+           throw new Exception("ERROR: there is no mwe");
+        mwe += wordsArray[verbNoun[0]]+" "+wordsArray[verbNoun[1]];
         
         return mwe;
         	
