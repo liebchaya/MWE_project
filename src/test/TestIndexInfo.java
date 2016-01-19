@@ -24,6 +24,8 @@ public class TestIndexInfo {
 //		System.out.println("Sentence 6780: " + indexInfo.getSentenceContent(6780));
 		
 		Iterable<MweExample> m =indexInfo.GenerateNegativeExamples(indexInfo.randomizeSentences(600, 10));
+//		Iterable<MweExample> m =indexInfo.GenerateNegativeExamples(indexInfo.containVerbSentences(10));
+
 		for(MweExample mweExample : m)
 			System.out.println(mweExample.getMwe());
 	}

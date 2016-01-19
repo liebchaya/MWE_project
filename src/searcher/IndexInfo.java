@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +59,41 @@ public class IndexInfo {
 		return sentencesIndexes;
 	}
 	
+	public Iterable<Integer> containVerbSentences(int iterableSize) throws Exception{
+		
+		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\targetTermsVNC.txt");
+		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
+		Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+		List<Integer> sentencesIndexes = new ArrayList<Integer>();
+		Random rand = new Random();
+		Integer randomNum;
+		
+		while(iterableSize > 0){	
+			randomNum = rand.nextInt(505);
+	        String sen;
+	        while(--randomNum > 0)
+	        	br.readLine();
+	        sen = br.readLine();
+			String[]wordsArray = sen.split(" ");
+			Iterable<Integer> verbIndexex = getVerbIndexes(Tagger.getTaggerPOSList(sen));
+			for(Integer integer : verbIndexex){
+				List<Integer> resultList = searcher.getUnigramQueryResultsAsIntegerList(wordsArray[integer]);
+				for(Integer integer2 : resultList) {
+					if(iterableSize > 0){
+						if(isSuitableDistance(getSentenceContent(integer2)) != null){  //if sentence has good distance
+							sentencesIndexes.add(integer2);
+							iterableSize--;
+						}
+					}
+					else break;
+				}
+				
+			}
+		}
+		br.close();
+		return sentencesIndexes;
+	}
+	
 	public Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
 		
 		ArrayList<MweExample> mweExamples = new ArrayList<MweExample>();
@@ -103,7 +140,7 @@ public class IndexInfo {
 	private boolean isNotMWE(Integer index) throws Exception{
 		
 		boolean b = false;		
-		FileInputStream MWEfile = new FileInputStream("C:\\javaInstallation\\jre\\lib\\targetTermsVNC.txt");
+		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\targetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
         String strLine;
         String sen = getSentenceContent(index);
