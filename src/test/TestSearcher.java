@@ -20,7 +20,7 @@ public class TestSearcher {
 //		System.out.println("List of sentences: " + resultList);
 		
 		IndexInfo indexInfo = new IndexInfo("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
-		Tagger.init("c:\\BGUTaggerData\\");
+		Tagger.init("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\jars\\tagger\\");
 		System.out.println(indexInfo.containVerbSentences(20));
 		System.out.println(indexInfo.randomizeSentences(600000, 20));
 		

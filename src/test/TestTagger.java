@@ -16,11 +16,16 @@ public class TestTagger {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		Tagger.init("F:\\BGUTaggerData\\");
+		Tagger.init("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\jars\\tagger\\");
 //		String posStr = Tagger.getTaggerPOSString("אודה ולא אבוש");
 //		System.out.println(posStr);
-		System.out.println(Tagger.getTaggerPOSList("אסף את השברים"));
-		System.out.println(Tagger.getTaggerPOSList("אודה ולא אבוש"));
+//		System.out.println(Tagger.getTaggerPOSList("אסף את השברים"));
+//		System.out.println(Tagger.getTaggerPOSList("אודה ולא אבוש"));
+//		System.out.println(Tagger.getTaggerPOSList("אכל כדבעי")); 
+//		Tagger.getSuffix("כשהלכתי לתומי");
+//		Tagger.getSuffix("אחזו השבץ");
+//		System.out.println(Tagger.getTaggerPOSList("הגדיל לעשות"));
+//		System.out.println(Tagger.getTaggerPOSList("לעשות להגדיל"));
 //		posStr = posStr.replaceAll("adverb", "");
 //		System.out.println(posStr);
 //		if(posStr.contains("noun")&&posStr.contains("verb"))
@@ -39,8 +44,16 @@ public class TestTagger {
 //		}
 //		reader.close();
 //		writer.close();
-		Tagger.init("c:\\BGUTaggerData\\");
-		System.out.println(Tagger.getTaggerPOSList("הילד אוסף את המשחקים בחצר"));
+//		Tagger.init("c:\\BGUTaggerData\\");
+//		System.out.println(Tagger.getTaggerPOSList("אל תעשה את זה"));
+//		System.out.println(Tagger.getTaggerPOSList("היא הלכה"));
+//		System.out.println(Tagger.getTaggerPOSList("אם אחזור משם"));
+//		System.out.println(Tagger.getTaggerPOSList("כן כן קפטן"));
+//	not working	//System.out.println(Tagger.getSuffix("נאכל"));
+//	not working	//System.out.println(Tagger.getSuffix("שיחקנו"));
+		System.out.println(Tagger.getSuffix("ישבתי"));
+
+
 	}
 
 }

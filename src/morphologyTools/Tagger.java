@@ -92,7 +92,24 @@ public class Tagger {
 		}
 		return lemmas;
 	}
+///////////////////////////////////////////////////////////////////////////////////	
+	public static List<String>  getSuffix(String str) throws Exception{
+		ArrayList<String> s = new ArrayList<>();
+		for (Sentence sentence : getTaggedSentences(str)) 
+			for (TokenExt token : sentence.getTokens()) 
+				s.add(token._token.getSelectedAnal().getSuffix().toString());
+		return s;
+	}
 	
+	public static List<String>  getPrefix(String str) throws Exception{
+		ArrayList<String> s = new ArrayList<>();
+		for (Sentence sentence : getTaggedSentences(str)) 
+			for (TokenExt token : sentence.getTokens()) 
+				s.add(token._token.getSelectedAnal().getPrefixStr().toString());
+		return s;
+	}
+		
+///////////////////////////////////////////////////////////////////////////////////	
 	/**
 	 * Gets the most probable lemma, supports ngrams
 	 * @param str
