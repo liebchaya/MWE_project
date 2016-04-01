@@ -25,7 +25,7 @@ public class Tagger {
 	 * @throws Exception
 	 */
 	public static void init(String taggerHomdir) throws Exception{  
-		m_tagger = new SimpleTagger3(taggerHomdir,vohmm.application.Defs.TAGGER_OUTPUT_FORMAT_BASIC,false,false,false,false,null,AffixFiltering.NONE);
+		m_tagger = new SimpleTagger3(taggerHomdir,vohmm.application.Defs.TAGGER_OUTPUT_FORMAT_BASIC,false,false,/*false*/true,false,null,AffixFiltering.NONE);
 		BGULexicon._bHazal = true;
 	}
 	
@@ -92,12 +92,14 @@ public class Tagger {
 		}
 		return lemmas;
 	}
-///////////////////////////////////////////////////////////////////////////////////	
+///////////////////////////////////////////////////////////////////////////////////
+	
 	public static List<String>  getSuffix(String str) throws Exception{
 		ArrayList<String> s = new ArrayList<>();
 		for (Sentence sentence : getTaggedSentences(str)) 
 			for (TokenExt token : sentence.getTokens()) 
-				s.add(token._token.getSelectedAnal().getSuffix().toString());
+				if(token._token.getSelectedAnal().hasSuffix())
+					s.add(token._token.getSelectedAnal().getSuffix().toString());
 		return s;
 	}
 	

@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import morphologyTools.Tagger;
 import searcher.IndexInfo;
@@ -28,35 +29,98 @@ public class TestSearcher {
         	br.readLine();
         return br.readLine();
 	}
-	static void get250MWESen () throws FileNotFoundException, IOException{
-		Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+
+	static void get200MWESen () throws FileNotFoundException, IOException{
+		String result = "";
+		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
 		int i = 0;
-		List<String> result = new ArrayList<String>();
+		
+		List<String> result1 = new ArrayList<String>();
+		List<String> result2 = new ArrayList<String>();
+		
 		Random rand = new Random();
+		
 		boolean b = true;
-		while(i<250){
-			String sen = getMWE(rand.nextInt(504));
-			String sen1;
-			if(b){
-			 sen1 = getMWE(rand.nextInt(504));
-			 b = false;
-			}else {
-				sen1 = "";
-				b = true;
+		int rIndex1;
+		int rIndex2;
+		while(i<200){
+			
+			String sen1 = getMWE(rand.nextInt(504));
+			String sen2 = getMWE(rand.nextInt(504));
+			
+			List<String> ss1 = searcher.getQueryResultsAsStringList(sen1,100,false);
+			List<String> s1 = ss1.stream().distinct().collect(Collectors.toList());
+			List<String> ss2 = searcher.getQueryResultsAsStringList(sen2,100,false);
+			List<String> s2 = ss2.stream().distinct().collect(Collectors.toList());
+
+			
+			while (s1.size() == 0){
+				sen1 = getMWE(rand.nextInt(504));
+				ss1 = searcher.getQueryResultsAsStringList(sen1,100,false);
+				s1 = ss1.stream().distinct().collect(Collectors.toList());
 			}
-			List<String> s = searcher.getQueryResultsAsStringList(sen+" "+sen1,100,false);
-			if(s.size()!=0) {result.add(s.get(rand.nextInt(s.size()-1))); 
-			i++;}
+			while (s2.size() == 0){
+				sen2 = getMWE(rand.nextInt(504));
+				ss2 = searcher.getQueryResultsAsStringList(sen2,100,false);
+				s2 = ss2.stream().distinct().collect(Collectors.toList());
+			}
+			if(sen1 == sen2){			
+					rIndex1 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;
+					rIndex2 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;
+					while(b){	
+						b = false;
+						while(rIndex1 == rIndex2 || s1.get(rIndex1).split(" ").length < 6 || result.contains(sen1+":"+rIndex1))	{
+							rIndex1 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;
+							b = true;
+						}
+						while(s2.get(rIndex2).split(" ").length < 6 || result.contains(sen2+":"+rIndex2)){
+							rIndex2 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;
+							b = true;
+						}		
+					}
+					result1.add(s1.get(rIndex1)); 
+					result2.add(s2.get(rIndex2));
+					
+					result += sen1+":"+rIndex1;
+					result += sen2+":"+rIndex2;
+			}
+			else{
+				rIndex1 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;	
+				rIndex2 = (s2.size() > 2)?rand.nextInt(s2.size()-2):0;
+				
+				while(b){	
+					b = false;
+					while(s1.get(rIndex1).split(" ").length < 6 || result.contains(sen1+":"+rIndex1))	{
+						rIndex1 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;
+						b = true;
+					}
+					while(s2.get(rIndex2).split(" ").length < 6 || result.contains(sen2+":"+rIndex2)){
+						rIndex2 = (s2.size() > 2)?rand.nextInt(s2.size()-2):0;
+						b = true;
+					}		
+				}
+				result1.add(s1.get(rIndex1)); 
+				result2.add(s2.get(rIndex2));
+				
+				result += sen1+":"+rIndex1;
+				result += sen2+":"+rIndex1;
+			}
+			i++;
 		}
 		
-		PrintWriter writer = new PrintWriter("C:\\Users\\aday\\Desktop\\MWEsentences.txt", "UTF-8");
+		PrintWriter writer1 = new PrintWriter("C:\\Users\\aday\\Desktop\\MWEsentences1.txt", "UTF-8");
+		PrintWriter writer2 = new PrintWriter("C:\\Users\\aday\\Desktop\\MWEsentences2.txt", "UTF-8");
 		i=0;
-		while(i<250)
-			writer.println(result.get(i++));
-		writer.close();
+		while(i<200){
+			writer1.println(result1.get(i));
+			writer2.println(result2.get(i++));
+		}
+		writer1.close();
+		writer2.close();
 	}
+
 	public static void main(String[] args) throws Exception {
-		Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+//		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\withPunc");
 //		List<Integer> resultList = searcher.getUnigramQueryResultsAsIntegerList("אכל");
 //		System.out.println("Number of sentences: " +  resultList.size());
 //		System.out.println("List of sentences: " + resultList);
@@ -68,7 +132,11 @@ public class TestSearcher {
 		
 //		System.out.println(searcher.getQueryResultsAsStringList("יצא לפועל אלוהים ישמור", 100, true));
 
-		get250MWESen();
+		get200MWESen();
+		
+//		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\bible");
+//		System.out.println(searcher.getQueryResultsAsStringList("בראשית ברא ", 0, true));
+
 
 	}
 

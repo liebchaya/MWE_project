@@ -54,9 +54,11 @@ public class IndexInfo {
 	    
 		while(iterableSize > 0){
 			randomNum = rand.nextInt(maxValue);
-			if(isSuitableDistance(getSentenceContent(randomNum)) != null){  //if sentence has good distance
-				sentencesIndexes.add(randomNum);
-				iterableSize--;
+			if(!sentencesIndexes.contains(randomNum)){
+				if(isSuitableDistance(getSentenceContent(randomNum)) != null){  //if sentence has good distance
+					sentencesIndexes.add(randomNum);
+					iterableSize--;
+				}
 			}
 		}
 		
@@ -65,7 +67,7 @@ public class IndexInfo {
 	
 	public Iterable<Integer> containVerbSentences(int iterableSize) throws Exception{
 		
-		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\targetTermsVNC.txt");
+		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
 		Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
 		List<Integer> sentencesIndexes = new ArrayList<Integer>();
@@ -73,7 +75,7 @@ public class IndexInfo {
 		Integer randomNum;
 		
 		while(iterableSize > 0){	
-			randomNum = rand.nextInt(504);
+			randomNum = rand.nextInt(204);
 	        String sen;
 	        while(--randomNum > 0)
 	        	br.readLine();
@@ -86,10 +88,11 @@ public class IndexInfo {
 				for(Integer integer2 : resultList) {
 					if(iterableSize > 0){
 						String str = getSentenceContent(integer2);
-						if(isSuitableDistance(str) != null){  //if sentence has good distance
-							sentencesIndexes.add(integer2);
-							iterableSize--;
-						}
+						if(!sentencesIndexes.contains(integer2))
+							if(isSuitableDistance(str) != null){  //if sentence has good distance
+								sentencesIndexes.add(integer2);
+								iterableSize--;
+							}
 					}
 					else break;
 				}
@@ -104,16 +107,18 @@ public class IndexInfo {
 	public Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
 		
 		ArrayList<MweExample> mweExamples = new ArrayList<MweExample>();
-int i=1;
+		int i=1;
 		for(Integer index : random){
 			System.out.println(i++ +")");
-			if(!isNotMWE(index)){
+			if(isNotMWE(index)){
 				MweExample mweExample = new MweExample();
 				mweExample.setSentenceId(index);
 				mweExample.setMwe(MWE);
 				mweExample.setSentence(getSentenceContent(index));
 				mweExamples.add(mweExample);
 			}	
+			else 
+				System.out.println("/////////////////////////"+getSentenceContent(index));
 		}
 		
 		return mweExamples;
@@ -157,7 +162,7 @@ int i=1;
 	private boolean isNotMWE(Integer index) throws Exception{
 		
 		boolean b = false;		
-		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\targetTermsVNC.txt");
+		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
         String strLine;
         String sen = getSentenceContent(index);
@@ -245,20 +250,7 @@ int i=1;
         }
         return maxlen;
     }
-	
-//	private String getMWE(Integer index) throws IOException, Exception{
-//		
-//		String sen = getSentenceContent(index);
-//		String[]wordsArray = sen.split(" ");
-//        String mwe = "";
-//        Integer[] verbNoun = isSuitableDistance(sen);
-//        if (verbNoun == null)
-//           throw new Exception("ERROR: there is no mwe");
-//        mwe += wordsArray[verbNoun[0]]+" "+wordsArray[verbNoun[1]];
-//        
-//        return mwe;
-//        	
-//	}
+
 }
 
 
