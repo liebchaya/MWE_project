@@ -29,8 +29,8 @@ import morphologyTools.Tagger;
 
 public class IndexInfo {
 
-	private IndexSearcher m_indexSearcher = null;
-	String MWE = null;
+	private static IndexSearcher m_indexSearcher = null;
+	static String MWE = null;
 
 	public IndexInfo(String indexDir) throws IOException {
 		Directory directory = FSDirectory.open(new File(indexDir));
@@ -42,11 +42,11 @@ public class IndexInfo {
 		return m_indexSearcher.getIndexReader().numDocs();
 	}
 	
-	public String getSentenceContent(int docId) throws IOException{
+	public static String getSentenceContent(int docId) throws IOException{
 		return m_indexSearcher.getIndexReader().document(docId).get("TERM_VECTOR");
 	}
 	
-	public Iterable<Integer> randomizeSentences(int maxValue,int iterableSize) throws Exception{
+	public static Iterable<Integer> randomizeSentences(int maxValue,int iterableSize) throws Exception{
 		
 		ArrayList<Integer> sentencesIndexes = new ArrayList<Integer>();
 		Random rand = new Random();
@@ -65,7 +65,7 @@ public class IndexInfo {
 		return sentencesIndexes;
 	}
 	
-	public Iterable<Integer> containVerbSentences(int iterableSize) throws Exception{
+	public static Iterable<Integer> containVerbSentences(int iterableSize) throws Exception{
 		
 		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
@@ -104,7 +104,7 @@ public class IndexInfo {
 		return sentencesIndexes;
 	}
 	
-	public Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
+	public static Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
 		
 		ArrayList<MweExample> mweExamples = new ArrayList<MweExample>();
 		int i=1;
@@ -124,7 +124,7 @@ public class IndexInfo {
 		return mweExamples;
 	}
 	
-	private int getLength(Iterable<Integer> it){
+	private static int getLength(Iterable<Integer> it){
 		 if (it instanceof Collection)
 			    return ((Collection<Integer>)it).size();
 		  int i = 0;
@@ -132,7 +132,7 @@ public class IndexInfo {
 		  return i;
 	}
 	
-	private Integer[] isSuitableDistance(String sentence)throws Exception{
+	private static Integer[] isSuitableDistance(String sentence)throws Exception{
 		List<String> posList = Tagger.getTaggerPOSList(sentence);
 	    
 		
@@ -159,7 +159,7 @@ public class IndexInfo {
 
 }
 	
-	private boolean isNotMWE(Integer index) throws Exception{
+	private static boolean isNotMWE(Integer index) throws Exception{
 		
 		boolean b = false;		
 		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
@@ -195,7 +195,7 @@ public class IndexInfo {
 		return true;		
 	} 
 	
-	private Iterable<Integer> getNounIndexes(List<String> posList){
+	private static Iterable<Integer> getNounIndexes(List<String> posList){
 		
 		ArrayList<Integer> NounIndexes = new ArrayList<Integer>();
 		
@@ -209,7 +209,7 @@ public class IndexInfo {
 		return NounIndexes;
 	}
 	
-	private Iterable<Integer> getVerbIndexes(List<String> posList){
+	private static Iterable<Integer> getVerbIndexes(List<String> posList){
 		
 		ArrayList<Integer> verbIndexes = new ArrayList<Integer>();
 		
@@ -223,7 +223,7 @@ public class IndexInfo {
 		return verbIndexes;
 	}
 
-	private int LongestCommonSubstring(String str1, String str2)
+	private static int LongestCommonSubstring(String str1, String str2)
     {
         int[][] num = new int[str1.length()][str2.length()];
         int maxlen = 0;

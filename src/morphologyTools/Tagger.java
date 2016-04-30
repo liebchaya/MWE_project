@@ -94,21 +94,21 @@ public class Tagger {
 	}
 ///////////////////////////////////////////////////////////////////////////////////
 	
-	public static List<String>  getSuffix(String str) throws Exception{
+	public static String  getSuffix(String str) throws Exception{
 		ArrayList<String> s = new ArrayList<>();
 		for (Sentence sentence : getTaggedSentences(str)) 
 			for (TokenExt token : sentence.getTokens()) 
 				if(token._token.getSelectedAnal().hasSuffix())
-					s.add(token._token.getSelectedAnal().getSuffix().toString());
-		return s;
+					return (token._token.getSelectedAnal().getSuffix().toString());
+		return null;
 	}
 	
-	public static List<String>  getPrefix(String str) throws Exception{
+	public static String  getPrefix(String str) throws Exception{
 		ArrayList<String> s = new ArrayList<>();
 		for (Sentence sentence : getTaggedSentences(str)) 
 			for (TokenExt token : sentence.getTokens()) 
-				s.add(token._token.getSelectedAnal().getPrefixStr().toString());
-		return s;
+				return (token._token.getSelectedAnal().getPrefixStr().toString());
+		return null;
 	}
 		
 ///////////////////////////////////////////////////////////////////////////////////	

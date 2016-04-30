@@ -30,7 +30,7 @@ public class TestSearcher {
         return br.readLine();
 	}
 
-	static void get200MWESen () throws FileNotFoundException, IOException{
+	static void getMWESen (int size) throws FileNotFoundException, IOException{
 		String result = "";
 		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
 		int i = 0;
@@ -43,10 +43,10 @@ public class TestSearcher {
 		boolean b = true;
 		int rIndex1;
 		int rIndex2;
-		while(i<200){
+		while(i<size){
 			
-			String sen1 = getMWE(rand.nextInt(504));
-			String sen2 = getMWE(rand.nextInt(504));
+			String sen1 = getMWE(rand.nextInt(204));
+			String sen2 = getMWE(rand.nextInt(204));
 			
 			List<String> ss1 = searcher.getQueryResultsAsStringList(sen1,100,false);
 			List<String> s1 = ss1.stream().distinct().collect(Collectors.toList());
@@ -118,7 +118,45 @@ public class TestSearcher {
 		writer1.close();
 		writer2.close();
 	}
+	static public List<String> getMWElist (int size) throws FileNotFoundException, IOException{
+		String result = "";
+		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
+		int i = 0;
+		
+		List<String> result1 = new ArrayList<String>();		
+		Random rand = new Random();
+		
+		boolean b = true;
+		int rIndex1;
+		while(i<size){
+			
+			String sen1 = getMWE(rand.nextInt(204));
+		
+			List<String> ss1 = searcher.getQueryResultsAsStringList(sen1,100,false);
+			List<String> s1 = ss1.stream().distinct().collect(Collectors.toList());
+	
+			
+			while (s1.size() == 0){
+				sen1 = getMWE(rand.nextInt(504));
+				ss1 = searcher.getQueryResultsAsStringList(sen1,100,false);
+				s1 = ss1.stream().distinct().collect(Collectors.toList());
+			}
+			
+			rIndex1 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;			
+			while(b){	
+				b = false;
+				while(s1.get(rIndex1).split(" ").length < 6 || result.contains(sen1+":"+rIndex1))	{
+					rIndex1 = (s1.size() > 2)?rand.nextInt(s1.size()-2):0;
+					b = true;
+				}	
+			}
+			result1.add(s1.get(rIndex1)); 		
+			result += sen1+":"+rIndex1;
 
+			i++;
+		}
+		return result1;
+	}
 	public static void main(String[] args) throws Exception {
 //		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\withPunc");
 //		List<Integer> resultList = searcher.getUnigramQueryResultsAsIntegerList("אכל");
@@ -132,8 +170,6 @@ public class TestSearcher {
 		
 //		System.out.println(searcher.getQueryResultsAsStringList("יצא לפועל אלוהים ישמור", 100, true));
 
-		get200MWESen();
-		
 //		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\bible");
 //		System.out.println(searcher.getQueryResultsAsStringList("בראשית ברא ", 0, true));
 
