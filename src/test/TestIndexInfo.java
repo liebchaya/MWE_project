@@ -29,11 +29,11 @@ public class TestIndexInfo<T> {
 		Tagger.init("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\jars\\tagger\\");
 		
 		
-//		System.out.println("Number of sentences: " + indexInfo.getIndexSize());
+//		Syste.out.println("Number of sentences: " + indexInfo.getIndexSize());
 //		System.out.println("Sentence 678: " + indexInfo.getSentenceContent(678));
 //		System.out.println("Sentence 6780: " + indexInfo.getSentenceContent(6780));
 		
-		Iterable<MweExample> m =indexInfo.GenerateNegativeExamples(indexInfo.randomizeSentences(50000, 200));
+		Iterable<MweExample> m =indexInfo.GenerateNegativeExamples(indexInfo.randomizeSentences(500000,10));
 //		Iterable<MweExample> m =indexInfo.GenerateNegativeExamples(indexInfo.containVerbSentences(100));
 
 		System.out.println("\n"+getLength(m));

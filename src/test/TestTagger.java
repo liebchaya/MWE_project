@@ -19,7 +19,6 @@ public class TestTagger {
 		Tagger.init("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\jars\\tagger\\");
 //		String posStr = Tagger.getTaggerPOSString("אודה ולא אבוש");
 //		System.out.println(posStr);
-		System.out.println(Tagger.getTaggerPOSList("אסףכבע את השכעיעככיכיסברים"));
 		
 //		System.out.println(Tagger.getTaggerPOSList("אודה ולא אבוש"));
 //		System.out.println(Tagger.getTaggerPOSList("אכל כדבעי")); 

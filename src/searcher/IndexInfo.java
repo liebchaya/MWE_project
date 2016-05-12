@@ -54,8 +54,10 @@ public class IndexInfo {
 	    
 		while(iterableSize > 0){
 			randomNum = rand.nextInt(maxValue);
+			String str = getSentenceContent(randomNum);
 			if(!sentencesIndexes.contains(randomNum)){
-				if(isSuitableDistance(getSentenceContent(randomNum)) != null){  //if sentence has good distance
+				if(str.split(" ").length<=10)
+				if(isSuitableDistance(str) != null){  //if sentence has good distance
 					sentencesIndexes.add(randomNum);
 					iterableSize--;
 				}
@@ -69,12 +71,14 @@ public class IndexInfo {
 		
 		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
-		Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+		//Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
 		List<Integer> sentencesIndexes = new ArrayList<Integer>();
 		Random rand = new Random();
 		Integer randomNum;
 		
 		while(iterableSize > 0){	
+			new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
 			randomNum = rand.nextInt(204);
 	        String sen;
 	        while(--randomNum > 0)
@@ -88,11 +92,13 @@ public class IndexInfo {
 				for(Integer integer2 : resultList) {
 					if(iterableSize > 0){
 						String str = getSentenceContent(integer2);
-						if(!sentencesIndexes.contains(integer2))
+						if(!sentencesIndexes.contains(integer2)){
+							if(str.split(" ").length<=10)
 							if(isSuitableDistance(str) != null){  //if sentence has good distance
 								sentencesIndexes.add(integer2);
 								iterableSize--;
 							}
+						}
 					}
 					else break;
 				}
@@ -109,16 +115,16 @@ public class IndexInfo {
 		ArrayList<MweExample> mweExamples = new ArrayList<MweExample>();
 		int i=1;
 		for(Integer index : random){
-			System.out.println(i++ +")");
+			System.out.print(i++ +")");
 			if(isNotMWE(index)){
+				System.out.println();
 				MweExample mweExample = new MweExample();
 				mweExample.setSentenceId(index);
 				mweExample.setMwe(MWE);
 				mweExample.setSentence(getSentenceContent(index));
 				mweExamples.add(mweExample);
 			}	
-			else 
-				System.out.println("/////////////////////////"+getSentenceContent(index));
+			else System.out.println(":(");
 		}
 		
 		return mweExamples;
@@ -176,7 +182,7 @@ public class IndexInfo {
 			words = strLine.split(" ");
         	nounVerb = isSuitableDistance(strLine);
         	if(nounVerb !=null && nounVerb.length > 0)
-        	for(int i =0; i<nounVerbforCheck.length; i++){
+        	for(int i =0; i<nounVerbforCheck.length-1; i++){
         		String verb = wordsArray[nounVerbforCheck[i++]];
         		String noun = wordsArray[nounVerbforCheck[i]];
         		if(LongestCommonSubstring(words[nounVerb[0]], verb) >= 3){

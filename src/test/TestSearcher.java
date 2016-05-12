@@ -111,7 +111,7 @@ public class TestSearcher {
 		PrintWriter writer1 = new PrintWriter("C:\\Users\\aday\\Desktop\\MWEsentences1.txt", "UTF-8");
 		PrintWriter writer2 = new PrintWriter("C:\\Users\\aday\\Desktop\\MWEsentences2.txt", "UTF-8");
 		i=0;
-		while(i<200){
+		while(i<size){
 			writer1.println(result1.get(i));
 			writer2.println(result2.get(i++));
 		}
@@ -157,9 +157,11 @@ public class TestSearcher {
 		}
 		return result1;
 	}
+	
 	public static void main(String[] args) throws Exception {
-//		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\withPunc");
-//		List<Integer> resultList = searcher.getUnigramQueryResultsAsIntegerList("אכל");
+		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
+		List<String> resultList = searcher.getQueryResultsAsStringList("יצא לאור", 0, true);
+		System.out.println(resultList.size());
 //		System.out.println("Number of sentences: " +  resultList.size());
 //		System.out.println("List of sentences: " + resultList);
 		
@@ -169,7 +171,7 @@ public class TestSearcher {
 //		System.out.println(indexInfo.randomizeSentences(600000, 20));
 		
 //		System.out.println(searcher.getQueryResultsAsStringList("יצא לפועל אלוהים ישמור", 100, true));
-
+//		getMWESen(10);
 //		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\bible");
 //		System.out.println(searcher.getQueryResultsAsStringList("בראשית ברא ", 0, true));
 
