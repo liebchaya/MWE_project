@@ -95,7 +95,6 @@ public class Tagger {
 ///////////////////////////////////////////////////////////////////////////////////
 	
 	public static String  getSuffix(String str) throws Exception{
-		ArrayList<String> s = new ArrayList<>();
 		for (Sentence sentence : getTaggedSentences(str)) 
 			for (TokenExt token : sentence.getTokens()) 
 				if(token._token.getSelectedAnal().hasSuffix())
@@ -104,7 +103,6 @@ public class Tagger {
 	}
 	
 	public static String  getPrefix(String str) throws Exception{
-		ArrayList<String> s = new ArrayList<>();
 		for (Sentence sentence : getTaggedSentences(str)) 
 			for (TokenExt token : sentence.getTokens()) 
 				return (token._token.getSelectedAnal().getPrefixStr().toString());

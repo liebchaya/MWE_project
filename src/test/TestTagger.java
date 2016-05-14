@@ -52,7 +52,9 @@ public class TestTagger {
 //	not working	//System.out.println(Tagger.getSuffix("נאכל"));
 //	not working	//System.out.println(Tagger.getSuffix("שיחקנו"));
 //		System.out.println(Tagger.getSuffix("ישבתי"));
-
+		
+		System.out.println(Tagger.getTaggerPOSList("ילד"));
+		System.out.println(Tagger.getTaggerPOSList("ילדים"));
 
 	}
 
