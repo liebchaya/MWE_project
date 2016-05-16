@@ -11,9 +11,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.List;
+
 
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
@@ -26,7 +29,8 @@ import morphologyTools.Tagger;
 
 public class IndexInfo {
 
-	private IndexSearcher m_indexSearcher = null;
+	private static IndexSearcher m_indexSearcher = null;
+	static String MWE = null;
 
 	public IndexInfo(String indexDir) throws IOException {
 		Directory directory = FSDirectory.open(new File(indexDir));
@@ -38,11 +42,11 @@ public class IndexInfo {
 		return m_indexSearcher.getIndexReader().numDocs();
 	}
 	
-	public String getSentenceContent(int docId) throws IOException{
+	public static String getSentenceContent(int docId) throws IOException{
 		return m_indexSearcher.getIndexReader().document(docId).get("TERM_VECTOR");
 	}
 	
-	public Iterable<Integer> randomizeSentences(int maxValue,int iterableSize) throws Exception{
+	public static Iterable<Integer> randomizeSentences(int maxValue,int iterableSize) throws Exception{
 		
 		ArrayList<Integer> sentencesIndexes = new ArrayList<Integer>();
 		Random rand = new Random();
@@ -50,39 +54,50 @@ public class IndexInfo {
 	    
 		while(iterableSize > 0){
 			randomNum = rand.nextInt(maxValue);
-			if(isSuitableDistance(getSentenceContent(randomNum)) != null){  //if sentence has good distance
-				sentencesIndexes.add(randomNum);
-				iterableSize--;
+			String str = getSentenceContent(randomNum);
+			if(!sentencesIndexes.contains(randomNum)){
+				if(str.split(" ").length<=10)
+				if(isSuitableDistance(str) != null){  //if sentence has good distance
+					sentencesIndexes.add(randomNum);
+					iterableSize--;
+				}
 			}
 		}
 		
 		return sentencesIndexes;
 	}
 	
-	public Iterable<Integer> containVerbSentences(int iterableSize) throws Exception{
+	public static Iterable<Integer> containVerbSentences(int iterableSize) throws Exception{
 		
-		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\targetTermsVNC.txt");
+		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
-		Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+		//Searcher searcher = new Searcher("C:\\Users\\aday\\AppData\\Local\\GitHub\\TutorialRepository_a66c3719071da6d865a984bb8d6bfb5bcd775ec8\\new-repo\\MWE_project\\allMila");
+		Searcher searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
 		List<Integer> sentencesIndexes = new ArrayList<Integer>();
 		Random rand = new Random();
 		Integer randomNum;
 		
 		while(iterableSize > 0){	
-			randomNum = rand.nextInt(505);
+			new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
+			randomNum = rand.nextInt(204);
 	        String sen;
 	        while(--randomNum > 0)
 	        	br.readLine();
 	        sen = br.readLine();
+	        if(sen!= null){
 			String[]wordsArray = sen.split(" ");
 			Iterable<Integer> verbIndexex = getVerbIndexes(Tagger.getTaggerPOSList(sen));
 			for(Integer integer : verbIndexex){
 				List<Integer> resultList = searcher.getUnigramQueryResultsAsIntegerList(wordsArray[integer]);
 				for(Integer integer2 : resultList) {
 					if(iterableSize > 0){
-						if(isSuitableDistance(getSentenceContent(integer2)) != null){  //if sentence has good distance
-							sentencesIndexes.add(integer2);
-							iterableSize--;
+						String str = getSentenceContent(integer2);
+						if(!sentencesIndexes.contains(integer2)){
+							if(str.split(" ").length<=10)
+							if(isSuitableDistance(str) != null){  //if sentence has good distance
+								sentencesIndexes.add(integer2);
+								iterableSize--;
+							}
 						}
 					}
 					else break;
@@ -90,57 +105,70 @@ public class IndexInfo {
 				
 			}
 		}
+		}
 		br.close();
 		return sentencesIndexes;
 	}
 	
-	public Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
+	public static Iterable<MweExample> GenerateNegativeExamples(Iterable<Integer> random) throws Exception{
 		
 		ArrayList<MweExample> mweExamples = new ArrayList<MweExample>();
-
+		int i=1;
 		for(Integer index : random){
+			System.out.print(i++ +")");
 			if(isNotMWE(index)){
+				System.out.println();
 				MweExample mweExample = new MweExample();
 				mweExample.setSentenceId(index);
-				mweExample.setMwe(getMWE(index));
+				mweExample.setMwe(MWE);
 				mweExample.setSentence(getSentenceContent(index));
 				mweExamples.add(mweExample);
 			}	
+			else System.out.println(":(");
 		}
 		
 		return mweExamples;
 	}
 	
-	private int getLength(Iterable<Integer> it){
-		int i=0;
-		for(Integer index : it)
-			i++;
-		return i;
+	private static int getLength(Iterable<Integer> it){
+		 if (it instanceof Collection)
+			    return ((Collection<Integer>)it).size();
+		  int i = 0;
+		  for (@SuppressWarnings("unused") Object obj : it) i++;
+		  return i;
 	}
 	
-	private Integer[] isSuitableDistance(String sentence)throws Exception{
+	private static Integer[] isSuitableDistance(String sentence)throws Exception{
 		List<String> posList = Tagger.getTaggerPOSList(sentence);
-	    Integer[] verbNoun = new Integer[2];
+	    
 		
 		Iterable<Integer> verbIndex =  getVerbIndexes(posList);
 		Iterable<Integer> nounIndex = getNounIndexes(posList);
-		if(getLength(verbIndex) == 0 || getLength(nounIndex) == 0 )
+		Integer[] verbNoun = new Integer[getLength(verbIndex)*getLength(nounIndex)*2];
+		if(getLength(verbIndex) == 0)
 		   return null;
+		int i=0;
 		for(Integer verb : verbIndex)
 		for(Integer noun : nounIndex)
 			if(Math.abs(verb - noun) < 2){
-				verbNoun[0] = verb;
-				verbNoun[1] = noun;
-				return verbNoun;
+				verbNoun[i++] = verb;
+				verbNoun[i++] = noun;
 			}
-		return null;
+		int size=0;
+		for(int j=0;j<verbNoun.length;j++)
+			if(verbNoun[j]!= null)
+				size++;
+		Integer[] vn = new Integer[size];
+		for(int j=0; j<size; j++)
+			vn[j] = verbNoun[j];
+		return (vn.length == 0)?null:vn;
 
 }
 	
-	private boolean isNotMWE(Integer index) throws Exception{
+	private static boolean isNotMWE(Integer index) throws Exception{
 		
 		boolean b = false;		
-		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\targetTermsVNC.txt");
+		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\goodTargetTermsVNC.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile,"UTF-8"));
         String strLine;
         String sen = getSentenceContent(index);
@@ -150,28 +178,30 @@ public class IndexInfo {
         String[]words;
         Integer[] nounVerb;
            
-        int n = 0;
         while ((strLine = br.readLine()) != null) {
 			words = strLine.split(" ");
         	nounVerb = isSuitableDistance(strLine);
-        	if(nounVerb != null){
-        	if(LongestCommonSubstring(words[nounVerb[0]], wordsArray[nounVerbforCheck[0]]) >= 3)
-    		for(String findNoun : wordsArray){
-        			if(findNoun.length() > 3)n = 2;
-    				if(LongestCommonSubstring(findNoun, wordsArray[nounVerb[1]]) > findNoun.length()-n)
+        	if(nounVerb !=null && nounVerb.length > 0)
+        	for(int i =0; i<nounVerbforCheck.length-1; i++){
+        		String verb = wordsArray[nounVerbforCheck[i++]];
+        		String noun = wordsArray[nounVerbforCheck[i]];
+        		if(LongestCommonSubstring(words[nounVerb[0]], verb) >= 3){
+    				if(LongestCommonSubstring(words[nounVerb[1]], noun) >= words[nounVerb[1]].length()-1)
         					b = true;
-        			}  	
+        			} 
+        		MWE = "verb: " + verb+ " noun: " +noun; 
+        	}
     		if(b){
     			br.close();
     			return false;	
 			     }
             }
-        }    
+           
         br.close();
 		return true;		
 	} 
 	
-	private Iterable<Integer> getNounIndexes(List<String> posList){
+	private static Iterable<Integer> getNounIndexes(List<String> posList){
 		
 		ArrayList<Integer> NounIndexes = new ArrayList<Integer>();
 		
@@ -185,7 +215,7 @@ public class IndexInfo {
 		return NounIndexes;
 	}
 	
-	private Iterable<Integer> getVerbIndexes(List<String> posList){
+	private static Iterable<Integer> getVerbIndexes(List<String> posList){
 		
 		ArrayList<Integer> verbIndexes = new ArrayList<Integer>();
 		
@@ -199,7 +229,7 @@ public class IndexInfo {
 		return verbIndexes;
 	}
 
-	private int LongestCommonSubstring(String str1, String str2)
+	private static int LongestCommonSubstring(String str1, String str2)
     {
         int[][] num = new int[str1.length()][str2.length()];
         int maxlen = 0;
@@ -226,21 +256,7 @@ public class IndexInfo {
         }
         return maxlen;
     }
-	
-	private String getMWE(Integer index) throws IOException, Exception{
-		
-		Tagger.init("c:\\BGUTaggerData\\");  
-		String sen = getSentenceContent(index);
-		String[]wordsArray = sen.split(" ");
-        String mwe = "";
-        Integer[] verbNoun = isSuitableDistance(sen);
-        if (verbNoun == null)
-           throw new Exception("ERROR: there is no mwe");
-        mwe += wordsArray[verbNoun[0]]+" "+wordsArray[verbNoun[1]];
-        
-        return mwe;
-        	
-	}
+
 }
 
 

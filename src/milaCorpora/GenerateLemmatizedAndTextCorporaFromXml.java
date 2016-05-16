@@ -13,7 +13,7 @@ import vohmm.parser.corpus.SentenceParser;
 import vohmm.parser.corpus.TaggedScoredXMLSentenceParser;
 import vohmm.util.Bitmask;
 
-	public class GenerateLemmatizedCorporaFromXml {
+	public class GenerateLemmatizedAndTextCorporaFromXml {
 		static final String encoding = "CP1255";
 
 		public static void main(String[] args) {
@@ -32,7 +32,7 @@ import vohmm.util.Bitmask;
 					String inputDir = inputDirs[j];
 					FileBasedSentenceExtractor sentenceExtractor = new FileBasedSentenceExtractor(new File(inputDir), parser);
 					String dirName = inputDir.substring(inputDir.lastIndexOf("\\")+1,inputDir.length());
-					PrintStream out = new PrintStream(new FileOutputStream("F:\\"+dirName+".txt"), false, encoding);
+					PrintStream out = new PrintStream(new FileOutputStream("F:\\MilaLemmaText\\"+dirName+".txt"), false, encoding);
 					
 					sentenceExtractor.begin();
 					String prevSentenceName = "";
@@ -49,8 +49,9 @@ import vohmm.util.Bitmask;
 							else {
 								iSent++;
 								System.out.println(sentenceExtractor.getCurrentFile().getName() + ": " + iSent);
-								String lineInfo = sentenceExtractor.getCurrentFile().getAbsolutePath()+"#"+iSent+"#";
+								String lineInfo = sentenceExtractor.getCurrentFile().getAbsolutePath()+"@@"+iSent+"@@";
 								String line = lineInfo;
+								String text = "";
 								for (int i = 0; i < sentence.size(); i++) {
 									
 									Token token = sentence.getToken(i);
@@ -84,6 +85,7 @@ import vohmm.util.Bitmask;
 										}
 										Anal selectedAnal = token.getSelectedAnalOrFirst();
 										line += selectedAnal.getLemma().getBaseformStr() + " ";
+										text += token.getOrigStr() + " ";
 //										Anal selectedAnal = token
 //												.getSelectedAnalOrFirst();
 //										line += selectedAnal.getLemma()
@@ -109,7 +111,7 @@ import vohmm.util.Bitmask;
 								}
 								}
 								if (!line.trim().isEmpty()&&(!line.trim().equals(lineInfo))){
-									out.println(line.trim());
+									out.println(line.trim()+"@@"+text.trim());
 								}
 							}
 							} catch (Exception e) {

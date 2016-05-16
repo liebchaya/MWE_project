@@ -16,11 +16,12 @@ public class TestTagger {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		Tagger.init("F:\\BGUTaggerData\\");
-//		String posStr = Tagger.getTaggerPOSString("אודה ולא אבוש");
-//		System.out.println(posStr);
-		System.out.println(Tagger.getTaggerPOSList("אסף את השברים"));
-		System.out.println(Tagger.getTaggerPOSList("אודה ולא אבוש"));
+//		Tagger.init("F:\\BGUTaggerData\\");
+		Tagger.init("F:\\tagger\\");
+		String posStr = Tagger.getTaggerPOSString("הולך בין הטיפות");
+		System.out.println(posStr);
+		System.out.println(Tagger.getTaggerPOSList("אוסף את השברים"));
+//		System.out.println(Tagger.getTaggerPOSList("אודה ולא אבוש"));
 //		posStr = posStr.replaceAll("adverb", "");
 //		System.out.println(posStr);
 //		if(posStr.contains("noun")&&posStr.contains("verb"))
@@ -39,8 +40,9 @@ public class TestTagger {
 //		}
 //		reader.close();
 //		writer.close();
-		Tagger.init("c:\\BGUTaggerData\\");
-		System.out.println(Tagger.getTaggerPOSList("הילד אוסף את המשחקים בחצר"));
+//		Tagger.init("c:\\BGUTaggerData\\");
+//		System.out.println(Tagger.getTaggerPOSList("הילד אוסף את המשחקים בחצר"));
+//		System.out.println(Tagger.getTaggerPOSList("כשהלכתי לטיול"));
 	}
 
 }

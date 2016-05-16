@@ -7,6 +7,7 @@ import java.util.Set;
 
 import vohmm.application.SimpleTagger3;
 import vohmm.corpus.AffixFiltering;
+import vohmm.corpus.AnalProb;
 import vohmm.corpus.Sentence;
 import vohmm.corpus.TokenExt;
 import vohmm.lexicon.BGULexicon;
@@ -25,7 +26,7 @@ public class Tagger {
 	 * @throws Exception
 	 */
 	public static void init(String taggerHomdir) throws Exception{  
-		m_tagger = new SimpleTagger3(taggerHomdir,vohmm.application.Defs.TAGGER_OUTPUT_FORMAT_BASIC,false,false,false,false,null,AffixFiltering.NONE);
+		m_tagger = new SimpleTagger3(taggerHomdir,vohmm.application.Defs.TAGGER_OUTPUT_FORMAT_BASIC,false,false,/*false*/true,false,null,AffixFiltering.NONE);
 		BGULexicon._bHazal = true;
 	}
 	
@@ -87,12 +88,31 @@ public class Tagger {
 		for (Sentence sentence : getTaggedSentences(str)) {
 			for (TokenExt token : sentence.getTokens()) {
 				token._token.getSelectedAnal().getTag();
+				Set<AnalProb> anals = token._token.getAnals();
+				System.out.println(token._token.getSelectedAnal().getPrefixStr());
 					lemmas.add(token._token.getSelectedAnal().getTag().toString());
 		 }
 		}
 		return lemmas;
 	}
+///////////////////////////////////////////////////////////////////////////////////
 	
+	public static String  getSuffix(String str) throws Exception{
+		for (Sentence sentence : getTaggedSentences(str)) 
+			for (TokenExt token : sentence.getTokens()) 
+				if(token._token.getSelectedAnal().hasSuffix())
+					return (token._token.getSelectedAnal().getSuffix().toString());
+		return null;
+	}
+	
+	public static String  getPrefix(String str) throws Exception{
+		for (Sentence sentence : getTaggedSentences(str)) 
+			for (TokenExt token : sentence.getTokens()) 
+				return (token._token.getSelectedAnal().getPrefixStr().toString());
+		return null;
+	}
+		
+///////////////////////////////////////////////////////////////////////////////////	
 	/**
 	 * Gets the most probable lemma, supports ngrams
 	 * @param str

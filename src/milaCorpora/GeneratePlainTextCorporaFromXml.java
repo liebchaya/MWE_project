@@ -17,8 +17,8 @@ package milaCorpora;
 
 		public static void main(String[] args) {
 
-//			String [] inputDirs = new String[] {"H:\\MilaXML\\a7","H:\\MilaXML\\haretz","H:\\MilaXML\\knesset_tagged","H:\\MilaXML\\theMarker"};//,"H:\\MilaXML_omitted\\a7","H:\\MilaXML_omitted\\haretz\\omitted2","H:\\MilaXML_omitted\\knesset_tagged","H:\\MilaXML_omitted\\theMarker"};
-			String [] inputDirs = new String[] {"H:\\MilaXML\\wiki"};
+			String [] inputDirs = new String[] {"H:\\MilaXML\\a7","H:\\MilaXML\\haretz","H:\\MilaXML\\knesset_tagged","H:\\MilaXML\\theMarker"};//,"H:\\MilaXML_omitted\\a7","H:\\MilaXML_omitted\\haretz\\omitted2","H:\\MilaXML_omitted\\knesset_tagged","H:\\MilaXML_omitted\\theMarker"};
+//			String [] inputDirs = new String[] {"H:\\MilaXML\\wiki"};
 //			String [] inputDirs = new String[] {"H:\\MilaXML_omitted\\a7","H:\\MilaXML_omitted\\haretz\\omitted2","H:\\MilaXML_omitted\\knesset_tagged","H:\\MilaXML_omitted\\theMarker"};
 //			String [] inputDirs = new String[] {"H:\\MilaXML\\a7","H:\\MilaXML\\haretz","H:\\MilaXML\\knesset_tagged"};//,"H:\\MilaXML\\theMarker"};//,"H:\\MilaXML_omitted\\a7","H:\\MilaXML_omitted\\haretz\\omitted2","H:\\MilaXML_omitted\\knesset_tagged","H:\\MilaXML_omitted\\theMarker"};
 
@@ -31,7 +31,7 @@ package milaCorpora;
 					String inputDir = inputDirs[j];
 					FileBasedSentenceExtractor sentenceExtractor = new FileBasedSentenceExtractor(new File(inputDir), parser);
 					String dirName = inputDir.substring(inputDir.lastIndexOf("\\")+1,inputDir.length());
-					PrintStream out = new PrintStream(new FileOutputStream("F:\\"+dirName+".txt"), false, encoding);
+					PrintStream out = new PrintStream(new FileOutputStream("F:\\MilaCorporaWithPunc\\"+dirName+".txt"), false, encoding);
 					
 					sentenceExtractor.begin();
 					String prevSentenceName = "";
@@ -53,14 +53,16 @@ package milaCorpora;
 								for (int i = 0; i < sentence.size(); i++) {
 									
 									Token token = sentence.getToken(i);
-									if (token.hasAnals() && !token.isNotSelected()) {
-										// ignore punctuations
-										long pos = token.getSelectedAnalOrFirst()
-												.getTag().getBitmask()
-												& Bitmask.BASEFORM_POS;
-										if (pos == Bitmask.BASEFORM_POS_PUNCUATION) {
-											continue;
-										}
+//									if (token.hasAnals() && !token.isNotSelected()) {
+//										// ignore punctuations
+//										long pos = token.getSelectedAnalOrFirst()
+//												.getTag().getBitmask()
+//												& Bitmask.BASEFORM_POS;
+//										if (pos == Bitmask.BASEFORM_POS_PUNCUATION) {
+//											continue;
+//										}
+										
+										
 //										if (pos == Bitmask.BASEFORM_POS_NUMERAL) {
 //											long bitmask = token
 //													.getSelectedAnalOrFirst().getTag()
@@ -78,9 +80,9 @@ package milaCorpora;
 //										if (token.getSelectedAnalOrFirst().getLemma().getBaseformStr().replaceAll("#", "").equals("NUMBER")){
 //											continue;
 //										}
-										if (token.getOrigStr().equals(",")){
-											continue;
-										}
+//										if (token.getOrigStr().equals(",")){
+//											continue;
+//										}
 										
 										line += token.getOrigStr() + " ";
 //										Anal selectedAnal = token
@@ -105,7 +107,7 @@ package milaCorpora;
 //												+ token.getOrigStr();
 //									line += "\t";
 		
-								}
+//								}
 								}
 								if (!line.trim().isEmpty()&&(!line.trim().equals(lineInfo))){
 									out.println(line.trim());
