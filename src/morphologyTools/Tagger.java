@@ -7,6 +7,7 @@ import java.util.Set;
 
 import vohmm.application.SimpleTagger3;
 import vohmm.corpus.AffixFiltering;
+import vohmm.corpus.AnalProb;
 import vohmm.corpus.Sentence;
 import vohmm.corpus.TokenExt;
 import vohmm.lexicon.BGULexicon;
@@ -87,6 +88,8 @@ public class Tagger {
 		for (Sentence sentence : getTaggedSentences(str)) {
 			for (TokenExt token : sentence.getTokens()) {
 				token._token.getSelectedAnal().getTag();
+				Set<AnalProb> anals = token._token.getAnals();
+				System.out.println(token._token.getSelectedAnal().getPrefixStr());
 					lemmas.add(token._token.getSelectedAnal().getTag().toString());
 		 }
 		}
