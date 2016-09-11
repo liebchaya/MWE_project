@@ -1,9 +1,13 @@
 package mwe.scorers;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Mutual Expectation implementation
@@ -119,31 +123,34 @@ public class MutualExpectation implements MWEScorer {
 	 * @param maxN max n for n-gram
 	 * @throws IOException
 	 */
-	public MutualExpectation(String ngramsFileName, int maxN) throws IOException {
+	public MutualExpectation(List<String> filesPaths) throws IOException {
 		m_ngramCounts = new HashMap<Integer, Integer>();
 		m_ngramsData = new HashMap<String, String>();
-		for (int i=2; i<maxN+1; i++) {
-			String countsFile = ngramsFileName+i+".cnt";
-			BufferedReader reader = new BufferedReader(new FileReader(countsFile));
+		int i=2;
+		for(String filesPath : filesPaths){
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filesPath), "UTF-8"));
 			String line = reader.readLine();
 			int lineNum = 1;
-			m_ngramCounts.put(i,Integer.parseInt(line));
+			m_ngramCounts.put(i++,Integer.parseInt(line));
 			line = reader.readLine();
 			while (line!=null){
 				lineNum++;
 				String[] tokens = line.split("<>");
 				String ngram = "";
-				for(int j=0; j<tokens.length-1; j++)
-					ngram = ngram + " " + tokens[j];
-				ngram = ngram.trim();
-				m_ngramsData.put(ngram, tokens[tokens.length-1]);
-				line = reader.readLine();
-				if (lineNum%10000==0)
-					System.out.println("line: " + lineNum);
-//					break;
+				String[] numbers = tokens[tokens.length-1].split(" ");
+				if(!numbers[0].equals("1")){
+					for(int j=0; j<tokens.length-1; j++)
+						ngram = ngram + " " + tokens[j];
+					ngram = ngram.trim();
+					m_ngramsData.put(ngram, tokens[tokens.length-1]);
+					line = reader.readLine();
+					if (lineNum%100000==0)
+						System.out.println("line: " + lineNum);
+				}
+				else line=null;
 			}
 			reader.close();
-			System.out.println("Finished loading data file: " + countsFile);
+			System.out.println("Finished loading data file: " + filesPath);
 		}
 	}
 

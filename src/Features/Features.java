@@ -1,12 +1,15 @@
 package Features;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -16,12 +19,17 @@ import edu.ucla.sspace.common.SemanticSpace;
 import edu.ucla.sspace.common.Similarity;
 import edu.ucla.sspace.common.Similarity.SimType;
 import morphologyTools.Tagger;
+import mwe.scorers.BigramsMutualRankRatio;
+import mwe.scorers.MutualExpectation;
+import mwe.scorers.TrigramsMutualRankRatio;
+import searcher.LemmaSearcher;
 import searcher.Searcher;
+
 
 public class Features {
 	final static int DISTANCE = 3;
 	static Searcher searcher = null;
-	static Searcher searcherlemma = null;
+	static LemmaSearcher searcherlemma = null;
 	static Searcher searcherBible = null;
 	static SemanticSpace onDiskLemma1 = null;
 	static SemanticSpace onDiskLemma2 = null;
@@ -32,19 +40,28 @@ public class Features {
 	static SemanticSpace onDisk3 = null;
 	static SemanticSpace onDisk4 = null;
 	
-	private Features() throws IOException{
+	public Features() throws IOException{
 		searcher = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaCorporaWithPunc");
-		searcherlemma = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaNewsLemmaText");
-		searcherBible = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\bible");		
-		onDiskLemma1 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\coals-semantic-space.sspace");
-		onDiskLemma2 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\hal-semantic-space.sspace");
+		searcherlemma = new LemmaSearcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\milaNewsLemmaText");
+/*		searcherBible = new Searcher("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\bin\\bible");
+		System.out.println(1);
+		//onDiskLemma1 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\coals-semantic-space.sspace");
+		System.out.println(2);
+		onDiskLemma2 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\hal-semantic-space.sspace");		
+		System.out.println(3);
 		onDiskLemma3 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\random-indexing-4000v-2w-noPermutations.sspace");
+		System.out.println(4);
 		onDiskLemma4 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\reflective-random-indexing-4000v.sspace");
-		onDisk1 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\coals-semantic-space.sspace");
-		onDisk2 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\hal-semantic-space.sspace");
-		onDisk3 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\random-indexing-4000v-2w-noPermutations.sspace");
-		onDisk4 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\reflective-random-indexing-4000v.sspace");
-	}
+		System.out.println(5);
+		//onDisk1 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\coals-semantic-space.sspace");
+		System.out.println(6);
+		//onDisk2 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\hal-semantic-space.sspace");
+		System.out.println(7);
+		//onDisk3 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\random-indexing-4000v-2w-noPermutations.sspace");
+		System.out.println(8);
+		//onDisk4 = new OnDiskSemanticSpace("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\reflective-random-indexing-4000v.sspace");
+		System.out.println("finish");*/
+}
 	
 
 //////////////////////////////////////////////////////Auxiliary functions////////////////////////////////////////////////////
@@ -202,7 +219,7 @@ public class Features {
 			fw.close();
 		}
 
-		public static double compVectorsLemma(String sen,SimType s,String sspaceName) throws Exception {
+		private static double compVectorsLemma(String sen,SimType s,String sspaceName) throws Exception {
 			SemanticSpace onDisk = null;
 			switch (sspaceName){
 			case "coals-semantic-space":onDisk = onDiskLemma1; break;
@@ -213,22 +230,28 @@ public class Features {
 			List<String> senTags = Tagger.getTaggerPOSList(sen);
 			String[] words = sen.split(" ");
 			String term1 = null,term2 = null;
+			
+			
+			term1 = new String(words[0].getBytes(Charset.forName("utf-8")));
+			term2 = new String(words[1].getBytes(Charset.forName("utf-8")));
+			
+			/*
 			for(int i=0; i<senTags.size(); i++){
 				if(senTags.get(i).contains("verb"))
-					term1 = words[i];
+					term1 = new String(words[i].getBytes(Charset.forName("utf-8")));
 				if(senTags.get(i).contains("noun"))
-					term2 = words[i];
-			}
-			if(term1!= null && term2!=null){			
-				edu.ucla.sspace.vector.Vector vec = onDisk.getVector(term1);
-				edu.ucla.sspace.vector.Vector vec1 = onDisk.getVector(term2);
-				double sem = Similarity.getSimilarity(s, vec1, vec);
-				return sem;
-			}
-			return -1.0;
+					term2 = new String(words[i].getBytes(Charset.forName("utf-8")));
+			}*/
+						
+			edu.ucla.sspace.vector.Vector vec = onDisk.getVector(term1);
+			edu.ucla.sspace.vector.Vector vec1 = onDisk.getVector(term2);
+			double sem = Similarity.getSimilarity(s, vec1, vec);
+			return sem;
+			
+	
 		}
 		
-		public static double compVectors(String sen,SimType s,String sspaceName) throws Exception {
+		private static double compVectors(String sen,SimType s,String sspaceName) throws Exception {
 			SemanticSpace onDisk = null;
 			switch (sspaceName){
 			case "coals-semantic-space":onDisk = onDisk1; break;
@@ -239,19 +262,16 @@ public class Features {
 			List<String> senTags = Tagger.getTaggerPOSList(sen);
 			String[] words = sen.split(" ");
 			String term1 = null,term2 = null;
-			for(int i=0; i<senTags.size(); i++){
-				if(senTags.get(i).contains("verb"))
-					term1 = words[i];
-				if(senTags.get(i).contains("noun"))
-					term2 = words[i];
-			}
-			if(term1!= null && term2!=null){			
-				edu.ucla.sspace.vector.Vector vec = onDisk.getVector(term1);
-				edu.ucla.sspace.vector.Vector vec1 = onDisk.getVector(term2);
-				double sem = Similarity.getSimilarity(s, vec1, vec);
-				return sem;
-			}
-			return -1.0;
+			
+			term1 = new String(words[0].getBytes(Charset.forName("utf-8")));
+			if(!sen.contains("чеша"))
+				term2 = new String(words[1].getBytes(Charset.forName("utf-8")));
+			else term2 = new String(words[2].getBytes(Charset.forName("utf-8")));
+			
+			edu.ucla.sspace.vector.Vector vec = onDisk.getVector(term1);
+			edu.ucla.sspace.vector.Vector vec1 = onDisk.getVector(term2);
+			double sem = Similarity.getSimilarity(s, vec1, vec);
+			return sem;
 		}
 
 		//////////////////////////////////////////////////////Fetures////////////////////////////////////////////////////
@@ -276,7 +296,7 @@ public class Features {
 	}
 
 	//3
-	//Returns subtraction result between sentence in order and sentence not in order
+	//Returns subtraction result between sentence in order and sentence not in `
 	static public int constituent_order(String sen) throws Exception{
 		String senLemma = convertTOlemma(sen);
 		int test1 = searcherlemma.countQueryResults(senLemma,0, true);
@@ -616,7 +636,7 @@ public class Features {
 		for(String s : allSens){
 		List<String> POSstr = Tagger.getTaggerPOSList(s);
 		for(String pos : POSstr)
-			if(pos.contains("negation"))
+			if(pos.contains("negation") || pos.contains("negative"))
 				numOfS++;
 		}
 		return numOfS;	
@@ -1054,6 +1074,7 @@ public class Features {
 				numOfP++;
 		return numOfP;
 	}
+	//90
 	static public int prefix_noun_9(String sen) throws Exception{
 		int numOfP = 0;
 		List<String> prefixes = prefix_n(sen);
@@ -1279,7 +1300,7 @@ public class Features {
 		return numOfP;
 	}
 
-	//119
+	//118
 	//Returns number of sentences which has plural verb
 	static public int plural_verb(String sen) throws Exception{
 		int numOfS = 0;
@@ -1294,7 +1315,7 @@ public class Features {
 		return numOfS;	
 	}
 	
-	//120
+	//119
 	//Returns number of sentences which has singular verb
 	static public int singular_verb(String sen) throws Exception{
 		int numOfS = 0;
@@ -1309,7 +1330,7 @@ public class Features {
 		return numOfS;	
 	}
 
-	//121
+	//120
 	//Returns number of sentences which has plural noun
 	static public int plural_noun(String sen) throws Exception{
 		int numOfS = 0;
@@ -1324,7 +1345,7 @@ public class Features {
 		return numOfS;		
 	}
 	
-	//122
+	//121
 	//Returns number of sentences which has singular noun
 	static public int singular_noun(String sen) throws Exception{
 		int numOfS = 0;
@@ -1339,7 +1360,7 @@ public class Features {
 		return numOfS;		
 	}
 	
-	//123
+	//122
 	//Returns number of sentences which has singular noun and plural verb
 	static public int plural_verb_singular_noun(String sen) throws Exception{
 		int numOfS = 0;
@@ -1362,7 +1383,7 @@ public class Features {
 		return numOfS;		
 	}
 	
-	//124
+	//123
 	//Returns number of sentences which has plural noun and plural verb
 	static public int plural_verb_plural_noun(String sen) throws Exception{
 		int numOfS = 0;
@@ -1385,7 +1406,7 @@ public class Features {
 		return numOfS;			
 	}
 	
-	//125
+	//124
 	//Returns number of sentences which has singular verb and singular noun
 	static public int singular_verb_singular_noun(String sen) throws Exception{
 		int numOfS = 0;
@@ -1408,7 +1429,7 @@ public class Features {
 		return numOfS;		
 	}
 	
-	//126
+	//125
 	//Returns number of sentences which has singular verb and plural noun
 	static public int singualr_verb_plural_noun(String sen) throws Exception{
 		int numOfS = 0;
@@ -1431,483 +1452,526 @@ public class Features {
 		return numOfS;			
 	}
 
-	//127
+	//126
 	static public double trigramsLL(String sen) throws Exception{
 		return trigramsFiles(sen,"trigramsLL",true);
 	}
 	
-	//128
+	//127
 	static public double trigramsLLLemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"trigramsLLLemma",true);
 	}
 	
-	//129
+	//128
 	static public double trigramsPMI(String sen) throws Exception{
 		return trigramsFiles(sen,"trigramsPMI",true);
 	}
 	
-	//130
+	//129
 	static public double trigramsPMILemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"trigramsPMILemma",true);
 	}
 	
-	//131
+	//130
 	static public double trigramsPS(String sen) throws Exception{
 		return trigramsFiles(sen,"trigramsPS",true);
 	}
 	
-	//132
+	//131
 	static public double trigramsPSLemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"trigramsPSLemma",true);
 	}
 	
-	//133
+	//132
 	static public double trigramsTMI(String sen) throws Exception{
 		return trigramsFiles(sen,"trigramsTMI",true);
 	}
 	
-	//134
+	//133
 	static public double trigramsTMILemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"trigramsTMILemma",true);
 	}
 	
-	//135
+	//134
 	static public double bigramsLL(String sen) throws Exception{
 		return trigramsFiles(sen,"bigramsLL",false);
 	}
 	
-	//136
+	//135
 	static public double bigramsLLLemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"bigramsLLLemma",false);
 	}
 	
-	//137
+	//136
 	static public double bigramsPMI(String sen) throws Exception{
 		return trigramsFiles(sen,"bigramsPMI",false);
 	}
 	
-	//138
+	//137
 	static public double bigramsPMILemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"bigramsPMILemma",false);
 	}
 	
-	//139
+	//138
 	static public double bigramsPS(String sen) throws Exception{
 		return trigramsFiles(sen,"bigramsPS",false);
 	}
 	
-	//140
+	//139
 	static public double bigramsPSLemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"bigramsPSLemma",false);
 	}
 	
-	//141
+	//140
 	static public double bigramsTMI(String sen) throws Exception{
 		return trigramsFiles(sen,"bigramsTMI",false);
 	}
 	
-	//142
+	//141
 	static public double bigramsTMILemma(String sen) throws Exception{
 		return trigramsFiles(convertTOlemma(sen),"bigramsTMILemma",false);
 	}
 	
-	//143
+	//142
 	static public double compVectorsLemma11(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.COSINE, "coals-semantic-space");
 	}
 	
-	//144
+	//143
 	static public double compVectorsLemma12(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.LIN, "coals-semantic-space");
 	}
 	
-	//145
-	static public double compVectorsLemma13(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "coals-semantic-space");
-	}
+//	//144
+//	static public double compVectorsLemma13(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "coals-semantic-space");
+//	}
 	
-	//146
+	//145
 	static public double compVectorsLemma14(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.EUCLIDEAN, "coals-semantic-space");
 	}
 	
-	//147
+	//146
 	static public double compVectorsLemma15(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.PEARSON_CORRELATION, "coals-semantic-space");
 	}
 	
-	//149
+	//147
 	static public double compVectorsLemma16(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.AVERAGE_COMMON_FEATURE_RANK, "coals-semantic-space");
 	}
 	
-	//149
+	//148
 	static public double compVectorsLemma17(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.JACCARD_INDEX, "coals-semantic-space");
 	}
 	
-	//150
+	//149
 	static public double compVectorsLemma18(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.KENDALLS_TAU, "coals-semantic-space");
 	}
 	
-	//151
+	//150
 	static public double compVectorsLemma19(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.TANIMOTO_COEFFICIENT, "coals-semantic-space");
 	}
 	
-	//152
-	static public double compVectorsLemma110(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "coals-semantic-space");
-	}	
+//	//151
+//	static public double compVectorsLemma110(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "coals-semantic-space");
+//	}	
 
-	//153
+	//152
 	static public double compVectorsLemma21(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.COSINE, "hal-semantic-space");
 	}
 	
-	//154
+	//153
 	static public double compVectorsLemma22(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.LIN, "hal-semantic-space");
 	}
+
+//	//154
+//	static public double compVectorsLemma23(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "hal-semantic-space");
+//	}
 	
 	//155
-	static public double compVectorsLemma23(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "hal-semantic-space");
-	}
-	
-	//156
 	static public double compVectorsLemma24(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.EUCLIDEAN, "hal-semantic-space");
 	}
 	
-	//157
+	//156
 	static public double compVectorsLemma25(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.PEARSON_CORRELATION, "hal-semantic-space");
 	}
 	
-	//158
+	//157
 	static public double compVectorsLemma26(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.AVERAGE_COMMON_FEATURE_RANK, "hal-semantic-space");
 	}
 	
-	//159
+	//158
 	static public double compVectorsLemma27(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.JACCARD_INDEX, "hal-semantic-space");
 	}
 	
-	//160
+	//159
 	static public double compVectorsLemma28(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.KENDALLS_TAU, "hal-semantic-space");
 	}
 	
-	//161
+	//160
 	static public double compVectorsLemma29(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.TANIMOTO_COEFFICIENT, "hal-semantic-space");
 	}
 	
-	//162
-	static public double compVectorsLemma210(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "hal-semantic-space");
-	}
+//	//161
+//	static public double compVectorsLemma210(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "hal-semantic-space");
+//	}
 	
-	//163
+	//162
 	static public double compVectorsLemma31(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.COSINE, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//164
+	//163
 	static public double compVectorsLemma32(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.LIN, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//165
-	static public double compVectorsLemma33(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "random-indexing-4000v-2w-noPermutations");
-	}
+//	//164
+//	static public double compVectorsLemma33(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "random-indexing-4000v-2w-noPermutations");
+//	}
 	
-	//166
+	//165
 	static public double compVectorsLemma34(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.EUCLIDEAN, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//167
+	//166
 	static public double compVectorsLemma35(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.PEARSON_CORRELATION, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//168
+	//167
 	static public double compVectorsLemma36(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.AVERAGE_COMMON_FEATURE_RANK, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//169
+	//168
 	static public double compVectorsLemma37(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.JACCARD_INDEX, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//170
-	static public double compVectorsLemma38(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.KENDALLS_TAU, "random-indexing-4000v-2w-noPermutations");
-	}
+//	//169
+//	static public double compVectorsLemma38(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.KENDALLS_TAU, "random-indexing-4000v-2w-noPermutations");
+//	}
 	
-	//171
+	//170
 	static public double compVectorsLemma39(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.TANIMOTO_COEFFICIENT, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//172
-	static public double compVectorsLemma310(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "random-indexing-4000v-2w-noPermutations");
-	}
+//	//171
+//	static public double compVectorsLemma310(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "random-indexing-4000v-2w-noPermutations");
+//	}
 	
-	//173
+	//172
 	static public double compVectorsLemma41(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.COSINE, "reflective-random-indexing-4000v");
 	}
 	
-	//174
+	//173
 	static public double compVectorsLemma42(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.LIN, "reflective-random-indexing-4000v");
 	}
 	
-	//175
-	static public double compVectorsLemma43(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "reflective-random-indexing-4000v");
-	}
+//	//174
+//	static public double compVectorsLemma43(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.KL_DIVERGENCE, "reflective-random-indexing-4000v");
+//	}
 	
-	//176
+	//175
 	static public double compVectorsLemma44(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.EUCLIDEAN, "reflective-random-indexing-4000v");
 	}
 	
-	//177
+	//176
 	static public double compVectorsLemma45(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.PEARSON_CORRELATION, "reflective-random-indexing-4000v");
 	}
 	
-	//178
+	//177
 	static public double compVectorsLemma46(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.AVERAGE_COMMON_FEATURE_RANK, "reflective-random-indexing-4000v");
 	}
 	
-	//179
+	//178
 	static public double compVectorsLemma47(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.JACCARD_INDEX, "reflective-random-indexing-4000v");
 	}
 	
-	//180
-	static public double compVectorsLemma48(String sen) throws Exception{
-		return compVectorsLemma(convertTOlemma(sen), SimType.KENDALLS_TAU, "reflective-random-indexing-4000v");
-	}
+//	//179
+//	static public double compVectorsLemma48(String sen) throws Exception{
+//		return compVectorsLemma(convertTOlemma(sen), SimType.KENDALLS_TAU, "reflective-random-indexing-4000v");
+//	}
 	
-	//181
+	//180
 	static public double compVectorsLemma49(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.TANIMOTO_COEFFICIENT, "reflective-random-indexing-4000v");
 	}
 	
-	//182
+	//181
 	static public double compVectorsLemma410(String sen) throws Exception{
 		return compVectorsLemma(convertTOlemma(sen), SimType.SPEARMAN_RANK_CORRELATION, "reflective-random-indexing-4000v");
 	}
 
-	//183
+	//182
 	static public double compVectors11(String sen) throws Exception{
 		return compVectors(sen, SimType.COSINE, "coals-semantic-space");
 	}
 	
-	//184
+	//183
 	static public double compVectors12(String sen) throws Exception{
 		return compVectors(sen, SimType.LIN, "coals-semantic-space");
 	}
 	
-	//185
-	static public double compVectors13(String sen) throws Exception{
-		return compVectors(sen, SimType.KL_DIVERGENCE, "coals-semantic-space");
-	}
+//	//184
+//	static public double compVectors13(String sen) throws Exception{
+//		return compVectors(sen, SimType.KL_DIVERGENCE, "coals-semantic-space");
+//	}
 	
-	//186
+	//185
 	static public double compVectors14(String sen) throws Exception{
 		return compVectors(sen, SimType.EUCLIDEAN, "coals-semantic-space");
 	}
 	
-	//187
+	//186
 	static public double compVectors15(String sen) throws Exception{
 		return compVectors(sen, SimType.PEARSON_CORRELATION, "coals-semantic-space");
 	}
 	
-	//188
+	//187
 	static public double compVectors16(String sen) throws Exception{
 		return compVectors(sen, SimType.AVERAGE_COMMON_FEATURE_RANK, "coals-semantic-space");
 	}
 	
-	//189
+	//188
 	static public double compVectors17(String sen) throws Exception{
 		return compVectors(sen, SimType.JACCARD_INDEX, "coals-semantic-space");
 	}
 	
-	//190
+	//189
 	static public double compVectors18(String sen) throws Exception{
 		return compVectors(sen, SimType.KENDALLS_TAU, "coals-semantic-space");
 	}
 	
-	//191
+	//190
 	static public double compVectors19(String sen) throws Exception{
 		return compVectors(sen, SimType.TANIMOTO_COEFFICIENT, "coals-semantic-space");
 	}
 	
-	//192
-	static public double compVectors110(String sen) throws Exception{
-		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "coals-semantic-space");
-	}	
+//	//191
+//	static public double compVectors110(String sen) throws Exception{
+//		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "coals-semantic-space");
+//	}	
 
-	//193
+	//192
 	static public double compVectors21(String sen) throws Exception{
 		return compVectors(sen, SimType.COSINE, "hal-semantic-space");
 	}
 	
-	//194
+	//193
 	static public double compVectors22(String sen) throws Exception{
 		return compVectors(sen, SimType.LIN, "hal-semantic-space");
 	}
 	
-	//195
-	static public double compVectors23(String sen) throws Exception{
-		return compVectors(sen, SimType.KL_DIVERGENCE, "hal-semantic-space");
-	}
+//	//194
+//	static public double compVectors23(String sen) throws Exception{
+//		return compVectors(sen, SimType.KL_DIVERGENCE, "hal-semantic-space");
+//	}
 	
-	//196
+	//195
 	static public double compVectors24(String sen) throws Exception{
 		return compVectors(sen, SimType.EUCLIDEAN, "hal-semantic-space");
 	}
 	
-	//197
+	//196
 	static public double compVectors25(String sen) throws Exception{
 		return compVectors(sen, SimType.PEARSON_CORRELATION, "hal-semantic-space");
 	}
 	
-	//198
+	//197
 	static public double compVectors26(String sen) throws Exception{
 		return compVectors(sen, SimType.AVERAGE_COMMON_FEATURE_RANK, "hal-semantic-space");
 	}
 	
-	//199
+	//198
 	static public double compVectors27(String sen) throws Exception{
 		return compVectors(sen, SimType.JACCARD_INDEX, "hal-semantic-space");
 	}
 	
-	//200
+	//199
 	static public double compVectors28(String sen) throws Exception{
 		return compVectors(sen, SimType.KENDALLS_TAU, "hal-semantic-space");
 	}
 	
-	//201
+	//200
 	static public double compVectors29(String sen) throws Exception{
 		return compVectors(sen, SimType.TANIMOTO_COEFFICIENT, "hal-semantic-space");
 	}
 	
-	//202
-	static public double compVectors210(String sen) throws Exception{
-		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "hal-semantic-space");
-	}
+//	//201
+//	static public double compVectors210(String sen) throws Exception{
+//		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "hal-semantic-space");
+//	}
 	
-	//203
+	//202
 	static public double compVectors31(String sen) throws Exception{
 		return compVectors(sen, SimType.COSINE, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//204
+	//203
 	static public double compVectors32(String sen) throws Exception{
 		return compVectors(sen, SimType.LIN, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//205
-	static public double compVectors33(String sen) throws Exception{
-		return compVectors(sen, SimType.KL_DIVERGENCE, "random-indexing-4000v-2w-noPermutations");
-	}
+//	//204
+//	static public double compVectors33(String sen) throws Exception{
+//	  return compVectors(sen, SimType.KL_DIVERGENCE, "random-indexing-4000v-2w-noPermutations");
+//	}
 	
-	//206
+	//205
 	static public double compVectors34(String sen) throws Exception{
 		return compVectors(sen, SimType.EUCLIDEAN, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//207
+	//206
 	static public double compVectors35(String sen) throws Exception{
 		return compVectors(sen, SimType.PEARSON_CORRELATION, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//208
+	//207
 	static public double compVectors36(String sen) throws Exception{
 		return compVectors(sen, SimType.AVERAGE_COMMON_FEATURE_RANK, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//209
+	//208
 	static public double compVectors37(String sen) throws Exception{
 		return compVectors(sen, SimType.JACCARD_INDEX, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//210
-	static public double compVectors38(String sen) throws Exception{
-		return compVectors(sen, SimType.KENDALLS_TAU, "random-indexing-4000v-2w-noPermutations");
-	}
+//	//209
+//	static public double compVectors38(String sen) throws Exception{
+//	    return compVectors(sen, SimType.KENDALLS_TAU, "random-indexing-4000v-2w-noPermutations");
+//	}
 	
-	//211
+	//210
 	static public double compVectors39(String sen) throws Exception{
 		return compVectors(sen, SimType.TANIMOTO_COEFFICIENT, "random-indexing-4000v-2w-noPermutations");
 	}
 	
-	//212
-	static public double compVectors310(String sen) throws Exception{
-		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "random-indexing-4000v-2w-noPermutations");
-	}
+//	//211
+//	static public double compVectors310(String sen) throws Exception{
+//		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "random-indexing-4000v-2w-noPermutations");
+//	}
 	
-	//213
+	//212
 	static public double compVectors41(String sen) throws Exception{
 		return compVectors(sen, SimType.COSINE, "reflective-random-indexing-4000v");
 	}
 	
-	//214
+	//213
 	static public double compVectors42(String sen) throws Exception{
 		return compVectors(sen, SimType.LIN, "reflective-random-indexing-4000v");
 	}
 	
-	//215
-	static public double compVectors43(String sen) throws Exception{
-		return compVectors(sen, SimType.KL_DIVERGENCE, "reflective-random-indexing-4000v");
-	}
+//	//214
+//	static public double compVectors43(String sen) throws Exception{
+//		return compVectors(sen, SimType.KL_DIVERGENCE, "reflective-random-indexing-4000v");
+//	}
 	
-	//216
+	//215
 	static public double compVectors44(String sen) throws Exception{
 		return compVectors(sen, SimType.EUCLIDEAN, "reflective-random-indexing-4000v");
 	}
 	
-	//217
+	//216
 	static public double compVectors45(String sen) throws Exception{
 		return compVectors(sen, SimType.PEARSON_CORRELATION, "reflective-random-indexing-4000v");
 	}
 	
-	//218
+	//217
 	static public double compVectors46(String sen) throws Exception{
 		return compVectors(sen, SimType.AVERAGE_COMMON_FEATURE_RANK, "reflective-random-indexing-4000v");
 	}
 	
-	//219
+	//218
 	static public double compVectors47(String sen) throws Exception{
 		return compVectors(sen, SimType.JACCARD_INDEX, "reflective-random-indexing-4000v");
 	}
 	
-	//220
-	static public double compVectors48(String sen) throws Exception{
-		return compVectors(sen, SimType.KENDALLS_TAU, "reflective-random-indexing-4000v");
-	}
+//	//219
+//	static public double compVectors48(String sen) throws Exception{
+//		return compVectors(sen, SimType.KENDALLS_TAU, "reflective-random-indexing-4000v");
+//	}
 	
-	//221
+	//220
 	static public double compVectors49(String sen) throws Exception{
 		return compVectors(sen, SimType.TANIMOTO_COEFFICIENT, "reflective-random-indexing-4000v");
 	}
 	
+//	//221
+//	static public double compVectors410(String sen) throws Exception{
+//		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "reflective-random-indexing-4000v");
+//	}
+	
 	//222
-	static public double compVectors410(String sen) throws Exception{
-		return compVectors(sen, SimType.SPEARMAN_RANK_CORRELATION, "reflective-random-indexing-4000v");
+	//Returns the score of mutual exception
+	static public double mutualScore(String sen) throws Exception{
+		MutualExpectation mutualScorer = new MutualExpectation(Arrays.asList("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\bigramsNoFilter.cnt","C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\trigramsNoFilter.cnt"));
+		return mutualScorer.score(sen);
 	}
+	
+	//223
+	//Returns the score of mutual exception on lemma
+	static public double mutualScoreLemma(String sen) throws Exception{
+		MutualExpectation mutualScorer = new MutualExpectation(Arrays.asList("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\bigramsNoFilterLemma.cnt","C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\trigramsNoFilterLemma.cnt"));
+		return mutualScorer.score(sen);
+	}
+	
+	//224
+	//Returns the score of mutual RankRatio 
+	static public double mutualRankRatio(String sen) throws Exception{
+		if(sen.split(" ").length == 2){
+			BigramsMutualRankRatio bMRR = new BigramsMutualRankRatio("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\bigramsNoFilter.cnt");
+			return bMRR.score(sen);
+		}
+		else {
+			TrigramsMutualRankRatio tMRR = new TrigramsMutualRankRatio("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\trigramsNoFilter.cnt");
+			return tMRR.score(sen);
+		}
+	}
+	
+	//225
+	//Returns the score of mutual RankRatio on lemma
+	static public double mutualRankRatioLemma(String sen) throws Exception{
+		String s = convertTOlemma(sen);
+		if(sen.split(" ").length == 2){
+			BigramsMutualRankRatio bMRR = new BigramsMutualRankRatio("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\bigramsNoFilterLemma.cnt");
+			return bMRR.score(s);
+		}
+		else {
+			TrigramsMutualRankRatio tMRR = new TrigramsMutualRankRatio("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\NSPnews\\trigramsNoFilterLemma.cnt");
+			return tMRR.score(s);	
+		}
+	}
+	
+	
 }

@@ -1,6 +1,18 @@
 package test;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+
 import Features.Features;
+import edu.ucla.sspace.common.OnDiskSemanticSpace;
+import edu.ucla.sspace.common.SemanticSpace;
+import edu.ucla.sspace.common.Similarity;
+import edu.ucla.sspace.common.Similarity.SimType;
+import edu.ucla.sspace.vector.Vector;
 import morphologyTools.Tagger;
 
 
@@ -9,7 +21,7 @@ public class TestFeatures {
 	public static void main(String[] args) throws Exception {
 		
 		Tagger.init("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\jars\\tagger\\");
-//	Features f = new Features();
+		Features f = new Features();
 		
 		//1
 //		System.out.println("1)");
@@ -159,9 +171,12 @@ public class TestFeatures {
 //
 //		//19
 //		System.out.println("19)");
-//		System.out.println(Features.NEGATIONstopWord("לא הספקתי לכתוב"));
-//		System.out.println(Features.NEGATIONstopWord("אל תעשה זאת"));
-//		System.out.println(Features.NEGATIONstopWord("לא דובים ולא יער"));
+		System.out.println(Features.NEGATIONstopWord("לא הספקתי לכתוב"));
+		System.out.println(Tagger.getTaggerPOSList("לא הספקתי לכתוב"));
+		System.out.println(Features.NEGATIONstopWord("אל תעשה זאת"));
+		System.out.println(Tagger.getTaggerPOSList("אל תעשה זאת"));
+		System.out.println(Features.NEGATIONstopWord("אין דובים או יער"));	
+		System.out.println(Tagger.getTaggerPOSList("אין דובים או יער"));
 //		System.out.println();
 //
 //		//21 & 20 
@@ -199,6 +214,24 @@ public class TestFeatures {
 //		System.out.println(Features.trigramsLL("חבר הכנסת סער"));
 //		System.out.println(Features.bigramsLL("לימור לבנת"));
 //		System.out.println(Features.compVectors("תפוח תפוח"));
-		System.out.println(Features.non_Hebrew_letters("אבידTי H  "));
+//		test1();
 	}
+		
+	 static void test1() throws IOException {
+
+//		FileInputStream MWEfile = new FileInputStream("C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\a.txt");
+//		BufferedReader br = new BufferedReader(new InputStreamReader(MWEfile));
+		String term1 = new String("בא".getBytes(Charset.forName("utf-8")));
+		String term2 = new String("בטענות".getBytes(Charset.forName("utf-8")));
+		String fileName = "C:\\Users\\aday\\Documents\\MWE_project\\MWE_project\\MilaText1File\\baseSpaces\\coals-semantic-space.sspace";
+		SemanticSpace onDisk = new OnDiskSemanticSpace(fileName);
+		System.out.println("load");
+		Vector vec = onDisk.getVector(term1);
+		Vector vec1 = onDisk.getVector(term2);
+		double sem = Similarity.getSimilarity(SimType.COSINE, vec1, vec);
+		System.out.println(sem);
+//		br.close();
+	}
+	
+
 }

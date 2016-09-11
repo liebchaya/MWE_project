@@ -2,8 +2,10 @@ package mwe.scorers;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,7 +20,7 @@ import org.ardverk.collection.PatriciaTrie;
 public class TrigramsMutualRankRatio implements MWEScorer {
 
 	public static void main(String[] args) throws IOException{
-		TrigramsMutualRankRatio tMRR = new TrigramsMutualRankRatio(new File("C:\\responsa3.cnt"));
+		TrigramsMutualRankRatio tMRR = new TrigramsMutualRankRatio("C:\\responsa3.cnt");
 		System.out.println("צער בעלי חיים " + tMRR.score("צער בעלי חיים"));
 		System.out.println("כיבוד אב ואם " + tMRR.score("כיבוד אב ואם"));
 		System.out.println("של צער בעלי " + tMRR.score("של צער בעלי"));
@@ -130,8 +132,8 @@ public class TrigramsMutualRankRatio implements MWEScorer {
 	 * @param args
 	 * @throws IOException 
 	 */
-	public TrigramsMutualRankRatio(File trigramsFile) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(trigramsFile));
+	public TrigramsMutualRankRatio(String trigramsFile) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(trigramsFile), "UTF-8"));
 		m_prefixTrie = new PatriciaTrie<String, Pair<Integer,Integer>>(StringKeyAnalyzer.INSTANCE);
 		m_sufixTrie = new PatriciaTrie<String, Pair<Integer,Integer>>(StringKeyAnalyzer.INSTANCE);
 		m_midTrie = new PatriciaTrie<String, Pair<Integer,Integer>>(StringKeyAnalyzer.INSTANCE);
@@ -142,6 +144,8 @@ public class TrigramsMutualRankRatio implements MWEScorer {
 		while (line!=null){
 			lineNum++;
 			String[] tokens = line.split("<>");
+			String[] numbers = tokens[tokens.length-1].split(" ");
+			if(!numbers[0].equals("1")){
 			m_prefixTrie.put(tokens[0] + " " + tokens[1] + " " + tokens[2], new Pair<Integer,Integer>(Integer.parseInt(tokens[3].split(" ")[0]),Integer.parseInt(tokens[3].split(" ")[6])));
 			m_sufixTrie.put(tokens[2] + " " + tokens[1] + " " + tokens[0], new Pair<Integer,Integer>(Integer.parseInt(tokens[3].split(" ")[0]),Integer.parseInt(tokens[3].split(" ")[4])));
 			m_midTrie.put(tokens[1] + " " + tokens[0] + " " + tokens[2], new Pair<Integer,Integer>(Integer.parseInt(tokens[3].split(" ")[0]),Integer.parseInt(tokens[3].split(" ")[5])));
@@ -150,6 +154,8 @@ public class TrigramsMutualRankRatio implements MWEScorer {
 				System.out.println("line: " + lineNum);
 			if (lineNum > 1000000)
 				break;
+			}
+			else line = null;
 		}
 		System.out.println("Finished loading trees");
 	}

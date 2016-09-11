@@ -2,8 +2,10 @@ package mwe.scorers;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,7 +21,7 @@ import org.ardverk.collection.PatriciaTrie;
 public class BigramsMutualRankRatio implements MWEScorer{
 
 	public static void main(String[] args) throws IOException{
-		BigramsMutualRankRatio bMRR = new BigramsMutualRankRatio(new File("C:\\responsa2.cnt"));
+		BigramsMutualRankRatio bMRR = new BigramsMutualRankRatio("C:\\responsa2.cnt");
 		System.out.println("בית הצואר " + bMRR.score("בית הצואר"));
 		System.out.println("בית המקדש " + bMRR.score("בית המקדש"));
 		System.out.println("בית ספר " + bMRR.score("בית ספר"));
@@ -124,8 +126,8 @@ public class BigramsMutualRankRatio implements MWEScorer{
 	 * @param args
 	 * @throws IOException 
 	 */
-	public BigramsMutualRankRatio(File bigramsFile) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(bigramsFile));
+	public BigramsMutualRankRatio(String bigramsFile) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(bigramsFile), "UTF-8"));
 		m_prefixTrie = new PatriciaTrie<String, Pair<Integer,Integer>>(StringKeyAnalyzer.INSTANCE);
 		m_sufixTrie = new PatriciaTrie<String, Pair<Integer,Integer>>(StringKeyAnalyzer.INSTANCE);
 		String line = reader.readLine();
@@ -135,11 +137,15 @@ public class BigramsMutualRankRatio implements MWEScorer{
 		while (line!=null){
 			lineNum++;
 			String[] tokens = line.split("<>");
+			String[] numbers = tokens[tokens.length-1].split(" ");
+			if(!numbers[0].equals("1")){
 			m_prefixTrie.put(tokens[0] + " " + tokens[1], new Pair<Integer,Integer>(Integer.parseInt(tokens[2].split(" ")[0]),Integer.parseInt(tokens[2].split(" ")[2])));
 			m_sufixTrie.put(tokens[1] + " " + tokens[0], new Pair<Integer,Integer>(Integer.parseInt(tokens[2].split(" ")[0]),Integer.parseInt(tokens[2].split(" ")[1])));
 			line = reader.readLine();
 			if (lineNum%10000==0)
 				System.out.println("line: " + lineNum);
+			}
+			else line=null;
 		}
 		reader.close();
 		System.out.println("Finished loading trees");
